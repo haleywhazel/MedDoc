@@ -10,9 +10,7 @@ It will print a short assistant response if the key is valid; otherwise you
 will see an authentication error from the OpenAI client.
 """
 
-import os
 import sys
-import typing as _t
 from pathlib import Path
 
 from openai import OpenAI
@@ -25,7 +23,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 # Load env vars via backend.config (which already calls python-dotenv)
-from backend.config import OPENAI_API_KEY, OPENAI_MODEL, require_env
+from backend.config import OPENAI_API_KEY, OPENAI_MODEL, require_env  # noqa: E402
 
 
 def main() -> None:
