@@ -31,9 +31,11 @@ export default function Home() {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = "auto";
-    const lineHeight = 24; // approx 1.5rem with tailwind text-sm
+    const lineHeight = 24; // ≈1.5rem
     const maxHeight = lineHeight * MAX_ROWS;
-    ta.style.height = `${Math.min(ta.scrollHeight, maxHeight)}px`;
+    const newHeight = Math.min(ta.scrollHeight, maxHeight);
+    ta.style.height = `${newHeight}px`;
+    ta.style.overflowY = newHeight >= maxHeight ? "auto" : "hidden";
   };
 
   const send = async (e?: FormEvent) => {
@@ -144,7 +146,7 @@ export default function Home() {
 
       {/* Main chat area */}
       <main className="flex-1 flex flex-col items-center overflow-hidden bg-gray-100 py-2">
-        <div className="flex flex-col w-full max-w-md flex-1 shadow bg-white">
+        <div className="flex flex-col w-full max-w-md flex-1 shadow bg-gray-50">
           {/* Messages */}
           <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 flex flex-col justify-end bg-gray-50">
             {messages.map((msg, idx) => (
@@ -184,7 +186,7 @@ export default function Home() {
           </div>
 
           {/* Input */}
-          <form onSubmit={send} className="border-t p-3 bg-white flex gap-2 items-end">
+          <form onSubmit={send} className="p-3 flex gap-2 items-end self-center w-4/5 mb-4 rounded-3xl shadow-lg border border-gray-300">
             <textarea
               ref={textareaRef}
               value={question}
@@ -194,7 +196,7 @@ export default function Home() {
               }}
               rows={1}
               placeholder="Ask Ello anything…"
-              className="flex-1 border rounded p-2 resize-none focus:outline-none transition-all"
+              className="flex-1 rounded p-2 resize-none focus:outline-none transition-all custom-scrollbar"
               style={{ maxHeight: `${MAX_ROWS * 24}px` }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -206,9 +208,9 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-gray-700 text-white px-4 py-2 rounded disabled:opacity-50 h-fit"
+              className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded disabled:opacity-50 cursor-pointer h-fit"
             >
-              {loading ? "…" : "Ask"}
+              Ask
             </button>
           </form>
         </div>
@@ -249,6 +251,21 @@ export default function Home() {
         .loading-dots span:nth-child(3) {
           animation-delay: 0.2s;
         }
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(0,0,0,0.4);
+          border-radius: 3px;
+        }
+        .custom-scrollbar {
+          scrollbar-color: rgba(128, 128, 128, 0.4) transparent;
+        }
+
         @keyframes dotFade {
           from {
             opacity: 0.4;
