@@ -117,9 +117,9 @@ export default function Home() {
 
       {/* Main chat area */}
       <main className="flex-1 flex flex-col items-center overflow-hidden bg-gray-100 py-2">
-        <div className="flex flex-col w-full max-w-md flex-1 shadow bg-white">
+        <div className="flex flex-col w-full max-w-md flex-1 min-h-0 shadow bg-white">
           {/* Messages */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 flex flex-col justify-end bg-white">
+          <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end bg-white custom-scrollbar">
             {messages.map((m, idx) => (
               <MessageBubble key={idx} message={m} showTrace={showTrace} />
             ))}
