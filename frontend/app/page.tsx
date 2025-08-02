@@ -65,7 +65,20 @@ export default function Home() {
             }
             return updated;
           });
-          if (i >= words.length) clearInterval(interval);
+          if (i >= words.length) {
+            clearInterval(interval);
+            // collapse to single text when animation done
+            setMessages((prev) => {
+              const updated = [...prev];
+              const msgFinal = updated[placeholderIndex!];
+              if (msgFinal && msgFinal.words) {
+                msgFinal.text = words.join(" ");
+                delete msgFinal.words;
+                msgFinal.trace = showTrace ? data.trace : undefined;
+              }
+              return updated;
+            });
+          }
         }, 120);
       }
     } catch (err) {
@@ -79,7 +92,7 @@ export default function Home() {
     <div className="flex flex-col h-screen">
       {/* Header */}
       <header className="px-4 py-2 flex justify-between items-center bg-white shadow">
-        <h1 className="font-semibold">MedDoc</h1>
+        <h1 className="font-semibold">Ello</h1>
         <div className="flex gap-4 items-center">
           <label className="flex items-center gap-1 text-sm select-none">
             <input

@@ -36,7 +36,7 @@ const ChatInput: React.FC<Props> = ({
         e.preventDefault();
         onSend();
       }}
-      className="p-3 flex gap-2 items-end self-center w-4/5 mb-4 rounded-3xl shadow-lg border border-gray-300"
+      className="p-3 flex gap-2 items-end self-center w-4/5 mb-6 rounded-3xl shadow-lg border border-gray-300"
     >
       <textarea
         ref={textareaRef}
