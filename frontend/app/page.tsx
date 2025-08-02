@@ -9,8 +9,8 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [debugMode, setDebugMode] = useState(true);
-  const [showTrace, setShowTrace] = useState(false);
+  const [prodMode, setProdMode] = useState(false);
+  const [traceNext, setTraceNext] = useState(true);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -36,8 +36,12 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const endpoint = debugMode ? "/api/chat/debug" : "/api/chat";
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${endpoint}`, {
+      const endpoint = traceNext ? "/api/chat/debug" : "/api/chat";
+      const dummyParam = prodMode ? '' : 'use_dummy_response=1';
+      const traceParam = traceNext ? '' : '';
+      const qs = [dummyParam].filter(Boolean).join('&');
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${endpoint}${qs ? '?' + qs : ''}`;
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: trimmed }),
@@ -61,7 +65,7 @@ export default function Home() {
             const msg = updated[placeholderIndex!];
             if (msg && msg.words) {
               msg.words = words.slice(0, i);
-              if (i >= words.length) msg.trace = showTrace ? data.trace : undefined;
+              if (i >= words.length) msg.trace = data.trace;
             }
             return updated;
           });
@@ -74,7 +78,7 @@ export default function Home() {
               if (msgFinal && msgFinal.words) {
                 msgFinal.text = words.join(" ");
                 delete msgFinal.words;
-                msgFinal.trace = showTrace ? data.trace : undefined;
+                msgFinal.trace = data.trace;
               }
               return updated;
             });
@@ -97,17 +101,21 @@ export default function Home() {
           <label className="flex items-center gap-1 text-sm select-none">
             <input
               type="checkbox"
-              checked={debugMode}
-              onChange={(e) => setDebugMode(e.target.checked)}
+              checked={prodMode}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setProdMode(checked);
+                
+              }}
               className="accent-blue-600"
             />
-            Debug
+            Prod
           </label>
           <label className="flex items-center gap-1 text-sm select-none">
             <input
               type="checkbox"
-              checked={showTrace}
-              onChange={(e) => setShowTrace(e.target.checked)}
+              checked={traceNext}
+              onChange={(e) => setTraceNext(e.target.checked)}
               className="accent-blue-600"
             />
             Trace
@@ -121,7 +129,7 @@ export default function Home() {
           {/* Messages */}
           <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end bg-white custom-scrollbar">
             {messages.map((m, idx) => (
-              <MessageBubble key={idx} message={m} showTrace={showTrace} />
+              <MessageBubble key={idx} message={m} />
             ))}
             <div id="chat-bottom" />
           </div>

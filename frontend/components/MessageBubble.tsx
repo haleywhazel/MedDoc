@@ -4,10 +4,9 @@ import LoadingDots from "./LoadingDots";
 
 interface Props {
   message: Message;
-  showTrace: boolean;
 }
 
-const MessageBubble: React.FC<Props> = ({ message, showTrace }) => {
+const MessageBubble: React.FC<Props> = ({ message }) => {
   const baseClasses =
     "rounded-xl p-3 max-w-sm min-h-12 whitespace-pre-wrap text-sm md:text-base transform animate-fade-in animate-bubble-grow";
   const bubbleClasses =
@@ -33,7 +32,7 @@ const MessageBubble: React.FC<Props> = ({ message, showTrace }) => {
         ) : (
           message.text
         )}
-        {showTrace && message.trace && (
+        {message.trace && (
           <pre className="mt-2 text-xs leading-tight text-gray-600 bg-gray-100 p-2 rounded whitespace-pre-wrap break-words">
             {JSON.stringify(message.trace, null, 2)}
           </pre>
