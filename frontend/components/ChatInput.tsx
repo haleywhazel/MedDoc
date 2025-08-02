@@ -19,16 +19,25 @@ const ChatInput: React.FC<Props> = ({
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const lineHeight = 24;
   const autoResize = () => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = "auto";
-    const lineHeight = 24;
     const maxHeight = lineHeight * maxRows;
     const newHeight = Math.min(ta.scrollHeight, maxHeight);
     ta.style.height = `${newHeight}px`;
     ta.style.overflowY = newHeight >= maxHeight ? "auto" : "hidden";
   };
+
+  // Reset height when value cleared
+  React.useEffect(() => {
+    if (!value && textareaRef.current) {
+      const ta = textareaRef.current;
+      ta.style.height = `100%`;
+      ta.style.overflowY = "hidden";
+    }
+  }, [value]);
 
   return (
     <form
@@ -47,8 +56,8 @@ const ChatInput: React.FC<Props> = ({
         }}
         rows={1}
         placeholder="Ask Ello anything…"
-        className="flex-1 rounded p-2 resize-none focus:outline-none transition-all custom-scrollbar"
-        style={{ height: '2rem', maxHeight: `${maxRows * 24}px` }}
+        className="flex-1 rounded p-2 resize-none focus:outline-none custom-scrollbar"
+        style={{ maxHeight: `${maxRows * 24}px` }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
