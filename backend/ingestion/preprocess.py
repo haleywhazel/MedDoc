@@ -33,6 +33,7 @@ from unstructured.staging.base import elements_from_json, elements_to_json
 
 from backend import ROOT_DIR
 from backend.config import OPENAI_API_KEY, require_env
+from backend.utils.config_utils import load_config
 
 # ---------------------------------------------------------------------------
 # Default configuration.  If a YAML file is supplied it will *override* these
@@ -55,38 +56,6 @@ _DEFAULT_CFG: dict[str, Any] = {
         "chroma_root": "chroma_langchain_db",
     },
 }
-
-
-# ---------------------------------------------------------------------------
-# Configuration helpers
-# ---------------------------------------------------------------------------
-
-
-def _deep_update(target: dict, src: dict) -> dict:
-    """Recursively merge *src* into *target* (modifies *target* in-place)."""
-    for key, value in src.items():
-        if isinstance(value, dict) and isinstance(target.get(key), dict):
-            _deep_update(target[key], value)
-        else:
-            target[key] = value
-    return target
-
-
-def load_config(path: str | Path | None = None) -> dict[str, Any]:
-    """Return effective config: defaults ⟹ YAML overrides (if provided)."""
-    cfg: dict[str, Any] = _DEFAULT_CFG.copy()
-    if path:
-        yaml_path = Path(path).expanduser()
-        if yaml_path.is_file():
-            with yaml_path.open("r") as fh:
-                user_cfg = yaml.safe_load(fh) or {}
-            if not isinstance(user_cfg, dict):
-                raise ValueError("Top-level YAML content must be a mapping/dict")
-            _deep_update(cfg, user_cfg)
-        else:
-            raise FileNotFoundError(yaml_path)
-    return cfg
-
 
 # ---------------------------------------------------------------------------
 # Core pipeline steps
@@ -209,13 +178,12 @@ def process_folder(folder: Path, cfg: dict[str, Any]) -> None:
                 {
                     "filename": meta.get("filename", pdf_path.name),
                     "page_number": meta.get("page_number"),
-                    "pdf_hash": pdf_hash
+                    "pdf_hash": pdf_hash,
                 }
             )
             ids.append(f"{pdf_hash}-{idx}")
         # vectordb.add_texts(texts=texts, metadatas=metadatas, ids=ids)
         total_chunks += len(texts)
-
 
     print(f"[preprocess] Added {total_chunks} chunks to {chroma_path}")
 
@@ -231,7 +199,7 @@ def main() -> None:
 
     config_path: str | None = None  # or a YAML file path
 
-    cfg = load_config(config_path)
+    cfg = load_config(_DEFAULT_CFG, config_path)
     process_folder(pdfs_dir, cfg)
 
 
