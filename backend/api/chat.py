@@ -21,7 +21,7 @@ class QueryResponse(BaseModel):
 
 USE_DUMMY = os.getenv("MEDDOC_DUMMY_RESPONSES") == "1"
 
-_DUMMY_ANSWER = "This is a dummy answer (frontend testing mode)."
+_DUMMY_ANSWER = "This is a dummy answer (frontend testing mode). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 _DUMMY_TRACE = {
     "question": "Dummy question",
     "retrieved_docs": [],
