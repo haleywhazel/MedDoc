@@ -111,6 +111,8 @@ def get_answer(
         Path to a YAML file whose contents will override the default config.
     """
 
+    return "Temporary answer: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+
     cfg = load_config(_DEFAULT_CFG, cfg_path)
 
     # 1. Retrieve similar chunks
