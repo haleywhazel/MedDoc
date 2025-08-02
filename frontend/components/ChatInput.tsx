@@ -48,7 +48,7 @@ const ChatInput: React.FC<Props> = ({
         rows={1}
         placeholder="Ask Ello anything…"
         className="flex-1 rounded p-2 resize-none focus:outline-none transition-all custom-scrollbar"
-        style={{ maxHeight: `${maxRows * 24}px` }}
+        style={{ height: '2rem', maxHeight: `${maxRows * 24}px` }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -59,7 +59,7 @@ const ChatInput: React.FC<Props> = ({
       <button
         type="submit"
         disabled={loading}
-        className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer h-fit"
+        className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer"
       >
         Ask
       </button>
