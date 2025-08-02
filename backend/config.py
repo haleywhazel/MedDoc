@@ -10,7 +10,6 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", overrid
 
 # Core secrets / settings
 OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
-GROQ_API_KEY: str | None = os.getenv("GROQ_API_KEY")
 
 # Model selection
 OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")

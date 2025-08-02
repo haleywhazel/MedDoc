@@ -17,3 +17,6 @@ __pycache__/
 .DS_Store 
 
 local/
+
+chroma_langchain_db/
+chroma_db/

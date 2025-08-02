@@ -5,4 +5,7 @@ chromadb
 PyMuPDF
 openai  # or groq SDK if you prefer
 python-dotenv
-tiktoken 
+tiktoken
+PyYAML
+langchain-openai
+pymupdf4llm

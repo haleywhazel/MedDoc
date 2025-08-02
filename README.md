@@ -44,7 +44,7 @@ Hospitals today often assign a full-time staff member to manually answer routine
 backend/              # FastAPI application and pipelines
   ├── main.py         # FastAPI app entry point
   ├── api/            # API routes (chat, health)
-  ├── ingestion/      # Scripts to load HR PDFs and build the vector index
+  ├── ingestion/      # Pre-processing (PDF → chunks → Chroma)
   └── retrieval/      # Helper to query Chroma and call an LLM
 frontend/             # Next.js app (to be generated)
 requirements.txt      # Python dependencies
@@ -57,9 +57,16 @@ requirements.txt      # Python dependencies
    pip install -r requirements.txt
    ```
 3. Put sample HR PDFs into a folder, e.g. `data/policies/`.
-4. Build the vector index:
+4. Pre-process PDFs and build / update the local Chroma vector store:
    ```bash
-   python backend/ingestion/ingest.py --docs_dir data/policies
+   # Option 1 – use built-in defaults (edit variables inside the script)
+   python backend/ingestion/preprocess.py
+
+   # Option 2 – point to a folder & YAML config
+   # (see backend/ingestion/preprocess_config.yaml for an example)
+   #
+   #   • embedding_model / chroma_root
+   #   • chunking parameters
    ```
 5. Run the API:
    ```bash
