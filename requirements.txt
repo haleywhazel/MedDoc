@@ -9,3 +9,4 @@ tiktoken
 PyYAML
 langchain-openai
 pymupdf4llm
+mangum  # ASGI adapter for AWS Lambda / Vercel edge functions

@@ -1,0 +1,11 @@
+fastapi
+langchain
+chromadb
+PyMuPDF
+openai
+python-dotenv
+tiktoken
+PyYAML
+langchain-openai
+pymupdf4llm
+mangum
