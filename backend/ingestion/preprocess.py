@@ -52,7 +52,7 @@ _DEFAULT_CFG: dict[str, Any] = {
         "overlap": 200,
     },
     "chroma": {
-        "embedding_model": "text-embedding-3-small",
+        "embedding_model": "text-embedding-3-large",
         "chroma_root": "chroma_langchain_db",
     },
 }
@@ -126,14 +126,14 @@ def process_folder(folder: Path, cfg: dict[str, Any]) -> None:
     # Prepare embeddings + Chroma path from config (nested under "chroma")
     # ------------------------------------------------------------------
     chroma_cfg = cfg.get("chroma", {})
-    model_name: str = chroma_cfg["embedding_model"]
+    embedding_model: str = chroma_cfg["embedding_model"]
     embeddings = OpenAIEmbeddings(
-        model=model_name,
+        model=embedding_model,
         api_key=require_env("OPENAI_API_KEY", OPENAI_API_KEY),
     )
 
     chroma_root = ROOT_DIR / chroma_cfg["chroma_root"]
-    chroma_path = chroma_root / model_name.replace("/", "_")
+    chroma_path = chroma_root / embedding_model.replace("/", "_")
     chroma_path.mkdir(parents=True, exist_ok=True)
 
     # Create / load the persistent Chroma vector store *once*
@@ -161,6 +161,7 @@ def process_folder(folder: Path, cfg: dict[str, Any]) -> None:
 
         if _pdf_embedding_exists(vectordb._collection, pdf_hash):
             # Skip PDFs whose chunks are already stored for this embedding model
+            print("skipping preprocess because it already exists")
             continue
 
         elements = preprocess_pdf(pdf_path, cfg)
@@ -182,7 +183,7 @@ def process_folder(folder: Path, cfg: dict[str, Any]) -> None:
                 }
             )
             ids.append(f"{pdf_hash}-{idx}")
-        # vectordb.add_texts(texts=texts, metadatas=metadatas, ids=ids)
+        vectordb.add_texts(texts=texts, metadatas=metadatas, ids=ids)
         total_chunks += len(texts)
 
     print(f"[preprocess] Added {total_chunks} chunks to {chroma_path}")

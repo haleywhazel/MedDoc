@@ -35,8 +35,8 @@ from backend.utils.config_utils import load_config
 
 _DEFAULT_CFG: Dict[str, Any] = {
     "chroma": {"persist_dir": CHROMA_PATH},
-    "embedding_model": "text-embedding-3-small",
-    "top_k": 4,
+    "embedding_model": "text-embedding-3-large",
+    "top_k": 6,
     "llm": {"model": OPENAI_MODEL},
     "enable_tracing": True,
     "trace_path": "local/traces/query_traces.jsonl",
@@ -138,6 +138,7 @@ def get_answer(
         "You are an HR assistant for NHS staffs."
         "Answer the question based solely on the provided policy context, if multiple documents are relevant, provide a summary of relevant information."
         "If the context does not contain the answer, reply 'I couldn't find the relevant information.' instead of inventing one."
+        "For example, if the document name seems irrelevant to the question, or if the given context looks like some kind of form, do not use it to answer."
         "Please state the answer by adhering closely to the original text, and do not generate any additional information."
         "If sensible, provide users with some extra information that is useful, note that this also has to be based on the context ONLY."
         "At the end of your answer, cite the page number and document name of the text that you used to answer the question."
