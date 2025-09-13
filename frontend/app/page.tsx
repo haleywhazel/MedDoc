@@ -1,14 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import ChatInput from "../components/ChatInput";
 import MessageBubble from "../components/MessageBubble";
-import { Message } from "../types";
+import { Message, Source } from "../types";
+
+const PDFViewer = dynamic(() => import("../components/PDFViewer"), { ssr: false });
 
 export default function Home() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentPdf, setCurrentPdf] = useState<{ file: string; page?: number | null } | null>(null);
   const [prodMode, setProdMode] = useState(false);
   const [traceNext, setTraceNext] = useState(true);
 
@@ -57,6 +61,12 @@ export default function Home() {
         });
 
         const words: string[] = (data.answer ?? "(no answer)").split(/\s+/);
+        const sources = data.sources as Source[] | undefined;
+        if (sources && sources.length > 0) {
+          const s0 = sources[0];
+          console.log("Opening PDF:", s0.file, "page", s0.page);
+          setCurrentPdf({ file: s0.file, page: s0.page });
+        }
         let i = 0;
         const interval = setInterval(() => {
           i += 1;
@@ -65,7 +75,9 @@ export default function Home() {
             const msg = updated[placeholderIndex!];
             if (msg && msg.words) {
               msg.words = words.slice(0, i);
-              if (i >= words.length) msg.trace = data.trace;
+              if (i >= words.length) {
+                if (sources) msg.sources = sources;
+              }
             }
             return updated;
           });
@@ -78,7 +90,8 @@ export default function Home() {
               if (msgFinal && msgFinal.words) {
                 msgFinal.text = words.join(" ");
                 delete msgFinal.words;
-                msgFinal.trace = data.trace;
+                // no trace needed now
+                if (sources) msgFinal.sources = sources;
               }
               return updated;
             });
@@ -93,7 +106,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen md:pl-[40%]">
       {/* Header */}
       <header className="px-4 py-2 flex justify-between items-center bg-white shadow">
         <h1 className="font-semibold">Ello</h1>
@@ -142,6 +155,14 @@ export default function Home() {
           />
         </div>
       </main>
+
+      {/* PDF sidebar */}
+      <div className="fixed left-0 top-0 bottom-0 w-[40%] max-w-lg z-10 hidden md:block">
+        <PDFViewer
+          fileUrl={currentPdf ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}` : null}
+          page={currentPdf?.page}
+        />
+      </div>
     </div>
   );
 }

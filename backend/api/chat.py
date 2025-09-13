@@ -15,8 +15,15 @@ class QueryRequest(BaseModel):
     question: str
 
 
+class Source(BaseModel):
+    file: str
+    page: int | None = None
+    text: str
+
+
 class QueryResponse(BaseModel):
     answer: str
+    sources: list[Source]
 
 
 
@@ -60,6 +67,10 @@ _DUMMY_TRACE = {
 
 from fastapi import Query
 
+# ---------------------------------------------------------------------------
+# Main chat route – returns answer + source metadata
+# ---------------------------------------------------------------------------
+
 
 @router.post("/chat", response_model=QueryResponse)
 async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> QueryResponse:  # noqa: D401
@@ -68,9 +79,14 @@ async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> Qu
     Set query param `use_dummy_response=true` to return a hard-coded dummy answer (UI testing).
     """
     if use_dummy_response:
-        return QueryResponse(answer=_DUMMY_ANSWER)
-    answer = get_answer(req.question)
-    return QueryResponse(answer=answer)
+        dummy_sources = [
+            Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet…")
+        ]
+        return QueryResponse(answer=_DUMMY_ANSWER, sources=dummy_sources)
+
+    # Use real pipeline with tracing so we can extract source metadata
+    answer, sources, trace = get_answer(req.question, trace=True)
+    return QueryResponse(answer=answer, sources=[Source(**s) for s in sources])
 
 
 # ---------------------------------------------------------------------------
@@ -81,12 +97,15 @@ async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> Qu
 class DebugResponse(BaseModel):
     answer: str
     trace: Dict[str, Any]
+    sources: list[Source]
 
 
 @router.post("/chat/debug", response_model=DebugResponse)
 async def chat_debug(req: QueryRequest, use_dummy_response: bool = Query(False)) -> DebugResponse:  # noqa: D401
     """Same as `/chat` but also returns the retrieval & generation trace."""
     if use_dummy_response:
-        return DebugResponse(answer=_DUMMY_ANSWER, trace=_DUMMY_TRACE)
-    answer, trace = get_answer(req.question, trace=True)
-    return DebugResponse(answer=answer, trace=trace)
+        dummy_sources = [Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet…")]
+        return DebugResponse(answer=_DUMMY_ANSWER, trace=_DUMMY_TRACE, sources=dummy_sources)
+
+    answer, sources, trace = get_answer(req.question, trace=True)
+    return DebugResponse(answer=answer, trace=trace, sources=[Source(**s) for s in sources])

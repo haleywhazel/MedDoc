@@ -12,6 +12,7 @@ The public entry-point is :func:`get_answer`.
 """
 
 import json
+import re
 import textwrap
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -135,13 +136,19 @@ def get_answer(
     context = "\n\n".join(f"{doc[0]}\n{doc[1]}" for doc in context_texts)
 
     system_prompt = (
-        "You are an HR assistant for NHS staffs."
-        "Answer the question based solely on the provided policy context, if multiple documents are relevant, provide a summary of relevant information."
-        "If the context does not contain the answer, reply 'I couldn't find the relevant information.' instead of inventing one."
-        "For example, if the document name seems irrelevant to the question, or if the given context looks like some kind of form, do not use it to answer."
-        "Please state the answer by adhering closely to the original text, and do not generate any additional information."
-        "If sensible, provide users with some extra information that is useful, note that this also has to be based on the context ONLY."
-        "At the end of your answer, cite the page number and document name of the text that you used to answer the question."
+        "You are an HR assistant for NHS staff. "
+        "Answer the question using ONLY the information in the provided context. "
+        "If the context is insufficient, reply 'I couldn't find the relevant information.' and do not add invented facts.\n\n"
+
+        "Output format – important:\n"
+        "After you have written your answer, add a single blank line followed by a JSON object *on a single line* with the key 'sources'.\n"
+        "The value of 'sources' must be an array of objects, each having: \n"
+        "  • file  – the document name (string)\n"
+        "  • page  – page number as an integer (omit if unknown)\n\n"
+
+        "Example:\n"
+        "Employees are entitled to take 52 weeks’ adoption leave. …\n\n"
+        "{\"sources\":[{\"file\":\"Policy-Handbook.pdf\",\"page\":37}]}\n"
     )
 
     prompt_content = textwrap.dedent(
@@ -165,7 +172,10 @@ def get_answer(
         api_key=OPENAI_API_KEY,
     )
     response = model.invoke(messages)
-    answer: str = response.content.strip()
+
+    raw_response: str = response.content.strip()
+
+    answer, sources = _extract_answer_and_sources(raw_response)
 
     # ---------------------------------------------------------------------
     # Tracing (optional)
@@ -187,4 +197,34 @@ def get_answer(
         _persist_trace(q_trace, cfg)
         trace_dict = asdict(q_trace)
 
-    return (answer, trace_dict) if trace else answer
+    if trace:
+        return answer, sources, trace_dict
+    return answer, sources
+
+
+# ---------------------------------------------------------------------------
+# Helper functions
+# ---------------------------------------------------------------------------
+
+
+def _extract_answer_and_sources(raw_response: str) -> tuple[str, List[Dict[str, Any]]]:
+    """Split *raw_response* into natural-language answer and sources array.
+
+    The model is expected to append a single-line JSON object like::
+
+        {"sources":[{"file":"Policy.pdf","page":3}]}
+    """
+
+    json_match = re.search(r"\{.*\}\s*$", raw_response, re.DOTALL)
+    sources: list[dict[str, Any]] = []
+    if json_match:
+        try:
+            sources_obj = json.loads(json_match.group(0))
+            sources = sources_obj.get("sources", []) if isinstance(sources_obj, dict) else []
+        except json.JSONDecodeError:
+            sources = []
+        answer_part = raw_response[: json_match.start()].strip()
+    else:
+        answer_part = raw_response.strip()
+
+    return answer_part, sources
