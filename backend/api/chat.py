@@ -27,7 +27,7 @@ class QueryResponse(BaseModel):
 
 
 _DUMMY_ANSWER = 'During maternity leave, employees working full or part-time will be entitled to occupational maternity pay as follows:\n- For the first eight weeks, full pay less any Statutory Maternity Pay or maternity allowance\n- For the next 18 weeks, half pay plus any Statutory Maternity Pay or maternity allowance (total cannot exceed full pay)\n- For the next 13 weeks, Statutory Maternity Pay or maternity allowance\n- For the final 13 weeks, no pay.'
-_DUMMY_ANSWER += '\n\nSources\n{"sources":[{"file":"Managers-and-Staff-Policy-Handbook-2024-W100.pdf","page":40},{"file":"W19-Leave-Policy-Chapter-6-Shared-Parental-Leave-Procedure-Amends-April-2024-V3.pdf","page":6},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":7},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":16},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":8}]}'
+_DUMMY_ANSWER += '{"sources":[{"file":"Managers-and-Staff-Policy-Handbook-2024-W100.pdf","page":40},{"file":"W19-Leave-Policy-Chapter-6-Shared-Parental-Leave-Procedure-Amends-April-2024-V3.pdf","page":6},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":7}]}'
 
 _DUMMY_TRACE = {
     "question": "Dummy question",

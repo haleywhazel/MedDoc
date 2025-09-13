@@ -44,13 +44,13 @@ const MessageBubble: React.FC<Props> = ({ message, onSourceClick }) => {
               <button
                 key={i}
                 type="button"
-                className="underline hover:text-blue-900 hover:cursor-pointer"
+                className="underline hover:text-blue-900 hover:cursor-pointer float-left text-left w-full"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSourceClick?.(s.file, s.page);
                 }}
               >
-                Source {i + 1}: {s.file} {s.page != null ? `(p. ${s.page})` : ""}
+                {s.file} {s.page != null ? `(p. ${s.page})` : ""}
               </button>
             ))}
           </div>

@@ -72,8 +72,9 @@ export default function Home() {
           setCurrentPdf({ file: s0.file, page: s0.page != null ? Number(s0.page) : undefined });
         }
         let i = 0;
+        const step = 2; // show 2 words per frame
         const interval = setInterval(() => {
-          i += 1;
+          i += step;
           setMessages((prev) => {
             const updated = [...prev];
             const msg = updated[placeholderIndex!];
@@ -98,7 +99,7 @@ export default function Home() {
               return updated;
             });
           }
-        }, 120);
+        }, 50);
       }
     } catch (err) {
       console.error(err);
@@ -149,7 +150,7 @@ export default function Home() {
         </div>
 
         {/* Chat column fixed width */}
-        <div className="w-full md:w-[400px] flex flex-col items-center overflow-hidden py-2">
+        <div className="w-full md:w-[500px] flex flex-col items-center overflow-hidden py-2">
           <div className="flex flex-col w-full flex-1 min-h-0 shadow bg-white">
             {/* Messages */}
             <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end custom-scrollbar">
