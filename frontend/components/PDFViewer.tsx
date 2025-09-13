@@ -1,6 +1,14 @@
 import dynamic from "next/dynamic";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const PDFViewer: any = dynamic(() => import("./PDFViewerClient"), { ssr: false });
+export interface PDFViewerProps {
+  fileUrl: string | null;
+  page?: number | null;
+}
+
+// Dynamically import the client-side viewer with proper props typing
+const PDFViewer = dynamic<PDFViewerProps>(
+  () => import("./PDFViewerClient"),
+  { ssr: false },
+);
 
 export default PDFViewer;

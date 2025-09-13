@@ -39,9 +39,10 @@ export default function PDFViewerClient({ fileUrl, page }: Props) {
   const outOfRange = page && numPages && (page < 1 || page > numPages);
 
   return (
-    <div className="overflow-y-scroll h-full bg-gray-50 border-r border-gray-300 p-2">
+    <div className="overflow-y-scroll h-full bg-gray-100 p-4">
       <Document
         key={`${fileUrl}-${page ?? 0}`}
+        className="flex flex-col items-center gap-4"
         file={fileUrl}
         onLoadSuccess={(doc) => {
           setNumPages(doc.numPages);
@@ -59,7 +60,7 @@ export default function PDFViewerClient({ fileUrl, page }: Props) {
             <Page
               key={n}
               pageNumber={n}
-              width={500}
+              width={600}
               onRenderSuccess={() => {
                 if (n === page) {
                   const el = document.querySelector(

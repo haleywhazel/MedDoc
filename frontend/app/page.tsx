@@ -1,12 +1,16 @@
 "use client";
 
+import type { PDFViewerProps } from "@/components/PDFViewer";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import ChatInput from "../components/ChatInput";
 import MessageBubble from "../components/MessageBubble";
 import { Message, Source } from "../types";
 
-const PDFViewer = dynamic(() => import("../components/PDFViewer"), { ssr: false });
+const PDFViewer = dynamic<PDFViewerProps>(
+  () => import("@/components/PDFViewer"),
+  { ssr: false },
+);
 
 export default function Home() {
   const [question, setQuestion] = useState("");
@@ -104,7 +108,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen md:pl-[40%]">
+    <div className="flex flex-col h-screen">
       {/* Header */}
       <header className="px-4 py-2 flex justify-between items-center bg-white shadow">
         <h1 className="font-semibold">Ello</h1>
@@ -134,39 +138,42 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main chat area */}
-      <main className="flex-1 flex flex-col items-center overflow-hidden bg-gray-100 py-2">
-        <div className="flex flex-col w-full max-w-md flex-1 min-h-0 shadow bg-white">
-          {/* Messages */}
-          <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end bg-white custom-scrollbar">
-            {messages.map((m, idx) => (
-              <MessageBubble
-                key={idx}
-                message={m}
-                onSourceClick={(file, pg) => {
-                  setCurrentPdf({ file, page: pg != null ? Number(pg) : undefined });
-                }}
-              />
-            ))}
-            <div id="chat-bottom" />
-          </div>
-
-          <ChatInput
-            value={question}
-            onValueChange={setQuestion}
-            onSend={send}
-            loading={loading}
+      {/* Content area with PDF viewer (left) and chat (right) */}
+      <main className="flex-1 flex overflow-hidden">
+        {/* PDF viewer fills remaining space */}
+        <div className="flex-1 hidden md:block border-r border-gray-300 bg-gray-50">
+          <PDFViewer
+            fileUrl={currentPdf ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}` : null}
+            page={currentPdf?.page}
           />
         </div>
-      </main>
 
-      {/* PDF sidebar */}
-      <div className="fixed left-0 top-0 bottom-0 w-[40%] max-w-lg z-10 hidden md:block">
-        <PDFViewer
-          fileUrl={currentPdf ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}` : null}
-          page={currentPdf?.page}
-        />
-      </div>
+        {/* Chat column fixed width */}
+        <div className="w-full md:w-[400px] flex flex-col items-center overflow-hidden py-2">
+          <div className="flex flex-col w-full flex-1 min-h-0 shadow bg-white">
+            {/* Messages */}
+            <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end custom-scrollbar">
+              {messages.map((m, idx) => (
+                <MessageBubble
+                  key={idx}
+                  message={m}
+                  onSourceClick={(file, pg) => {
+                    setCurrentPdf({ file, page: pg != null ? Number(pg) : undefined });
+                  }}
+                />
+              ))}
+              <div id="chat-bottom" />
+            </div>
+
+            <ChatInput
+              value={question}
+              onValueChange={setQuestion}
+              onSend={send}
+              loading={loading}
+            />
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
