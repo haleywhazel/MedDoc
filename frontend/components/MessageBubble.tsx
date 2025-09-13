@@ -44,7 +44,7 @@ const MessageBubble: React.FC<Props> = ({ message, onSourceClick }) => {
               <button
                 key={i}
                 type="button"
-                className="underline hover:text-blue-900"
+                className="underline hover:text-blue-900 hover:cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSourceClick?.(s.file, s.page);
