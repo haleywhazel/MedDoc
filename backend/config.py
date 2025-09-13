@@ -14,8 +14,8 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env", overrid
 OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
 
 # Model selection
-# OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
-OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+# OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 # Other knobs
 CHROMA_PATH: str = os.getenv("CHROMA_PATH", f"{ROOT_DIR}/chroma_langchain_db")

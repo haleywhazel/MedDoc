@@ -10,5 +10,5 @@ export interface Message {
 export interface Source {
   file: string;
   page?: number | null;
-  text: string;
+  text?: string;
 }

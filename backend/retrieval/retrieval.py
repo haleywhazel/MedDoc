@@ -37,7 +37,7 @@ from backend.utils.config_utils import load_config
 _DEFAULT_CFG: Dict[str, Any] = {
     "chroma": {"persist_dir": CHROMA_PATH},
     "embedding_model": "text-embedding-3-large",
-    "top_k": 6,
+    "top_k": 4,
     "llm": {"model": OPENAI_MODEL},
     "enable_tracing": True,
     "trace_path": "local/traces/query_traces.jsonl",
@@ -139,16 +139,15 @@ def get_answer(
         "You are an HR assistant for NHS staff. "
         "Answer the question using ONLY the information in the provided context. "
         "If the context is insufficient, reply 'I couldn't find the relevant information.' and do not add invented facts.\n\n"
-
         "Output format – important:\n"
         "After you have written your answer, add a single blank line followed by a JSON object *on a single line* with the key 'sources'.\n"
+        "Note that the sources MUST come from the context, and not generated or made up. The sources must also be relevant to the answer that you provided."
         "The value of 'sources' must be an array of objects, each having: \n"
         "  • file  – the document name (string)\n"
         "  • page  – page number as an integer (omit if unknown)\n\n"
-
         "Example:\n"
         "Employees are entitled to take 52 weeks’ adoption leave. …\n\n"
-        "{\"sources\":[{\"file\":\"Policy-Handbook.pdf\",\"page\":37}]}\n"
+        '{"sources":[{"file":"Policy-Handbook.pdf","page":37}]}\n'
     )
 
     prompt_content = textwrap.dedent(
@@ -218,11 +217,8 @@ def _extract_answer_and_sources(raw_response: str) -> tuple[str, List[Dict[str, 
     json_match = re.search(r"\{.*\}\s*$", raw_response, re.DOTALL)
     sources: list[dict[str, Any]] = []
     if json_match:
-        try:
-            sources_obj = json.loads(json_match.group(0))
-            sources = sources_obj.get("sources", []) if isinstance(sources_obj, dict) else []
-        except json.JSONDecodeError:
-            sources = []
+        sources_obj = json.loads(json_match.group(0))
+        sources = sources_obj.get("sources", []) if isinstance(sources_obj, dict) else []
         answer_part = raw_response[: json_match.start()].strip()
     else:
         answer_part = raw_response.strip()

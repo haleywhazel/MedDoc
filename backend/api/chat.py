@@ -6,7 +6,7 @@ from typing import Any, Dict, Tuple
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from backend.retrieval.retrieval import get_answer
+from backend.retrieval.retrieval import _extract_answer_and_sources, get_answer
 
 router = APIRouter(tags=["chat"])
 
@@ -18,7 +18,7 @@ class QueryRequest(BaseModel):
 class Source(BaseModel):
     file: str
     page: int | None = None
-    text: str
+    text: str | None = None
 
 
 class QueryResponse(BaseModel):
@@ -26,7 +26,9 @@ class QueryResponse(BaseModel):
     sources: list[Source]
 
 
-_DUMMY_ANSWER = "This is a dummy answer (frontend testing mode). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+_DUMMY_ANSWER = 'During maternity leave, employees working full or part-time will be entitled to occupational maternity pay as follows:\n- For the first eight weeks, full pay less any Statutory Maternity Pay or maternity allowance\n- For the next 18 weeks, half pay plus any Statutory Maternity Pay or maternity allowance (total cannot exceed full pay)\n- For the next 13 weeks, Statutory Maternity Pay or maternity allowance\n- For the final 13 weeks, no pay.'
+_DUMMY_ANSWER += '\n\nSources\n{"sources":[{"file":"Managers-and-Staff-Policy-Handbook-2024-W100.pdf","page":40},{"file":"W19-Leave-Policy-Chapter-6-Shared-Parental-Leave-Procedure-Amends-April-2024-V3.pdf","page":6},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":7},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":16},{"file":"W19-Leave-Policy-Chapter-4-Fertility-Pregnancy-and-Maternity-Additions-to-App-C-Dec-2024-V2.1.pdf","page":8}]}'
+
 _DUMMY_TRACE = {
     "question": "Dummy question",
     "retrieved_docs": [
@@ -77,12 +79,8 @@ async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> Qu
     Set query param `use_dummy_response=true` to return a hard-coded dummy answer (UI testing).
     """
     if use_dummy_response:
-        dummy_sources = [
-            Source(file="Acting-Down-Policy.pdf", page=3, text="Cached snippet…"),
-            Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet…"),
-            Source(file="On-Call-Policy.pdf", page=2, text="Cached snippet…"),
-        ]
-        return QueryResponse(answer=_DUMMY_ANSWER, sources=dummy_sources)
+        answer, sources = _extract_answer_and_sources(_DUMMY_ANSWER)
+        return QueryResponse(answer=_DUMMY_ANSWER, sources=sources)
 
     # Use real pipeline with tracing so we can extract source metadata
     answer, sources, trace = get_answer(req.question, trace=True)
@@ -104,12 +102,8 @@ class DebugResponse(BaseModel):
 async def chat_debug(req: QueryRequest, use_dummy_response: bool = Query(False)) -> DebugResponse:  # noqa: D401
     """Same as `/chat` but also returns the retrieval & generation trace."""
     if use_dummy_response:
-        dummy_sources = [
-            Source(file="Acting-Down-Policy.pdf", page=3, text="Cached snippet2…"),
-            Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet3…"),
-            Source(file="On-Call-Policy.pdf", page=2, text="Cached snippet4…"),
-        ]
-        return DebugResponse(answer=_DUMMY_ANSWER, trace=_DUMMY_TRACE, sources=dummy_sources)
+        answer, sources = _extract_answer_and_sources(_DUMMY_ANSWER)
+        return DebugResponse(answer=answer, trace=_DUMMY_TRACE, sources=sources)
 
     answer, sources, trace = get_answer(req.question, trace=True)
     return DebugResponse(answer=answer, trace=trace, sources=[Source(**s) for s in sources])
