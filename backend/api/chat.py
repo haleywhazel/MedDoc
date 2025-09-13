@@ -80,7 +80,7 @@ async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> Qu
         dummy_sources = [
             Source(file="Acting-Down-Policy.pdf", page=3, text="Cached snippet…"),
             Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet…"),
-            Source(file="Acting-Up-Policy-W13-v2.2-Nov-2024", page=2, text="Cached snippet…"),
+            Source(file="On-Call-Policy.pdf", page=2, text="Cached snippet…"),
         ]
         return QueryResponse(answer=_DUMMY_ANSWER, sources=dummy_sources)
 
@@ -105,9 +105,9 @@ async def chat_debug(req: QueryRequest, use_dummy_response: bool = Query(False))
     """Same as `/chat` but also returns the retrieval & generation trace."""
     if use_dummy_response:
         dummy_sources = [
-            Source(file="Acting-Down-Policy.pdf", page=3, text="Cached snippet…"),
-            Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet…"),
-            Source(file="Acting-Up-Policy-W13-v2.2-Nov-2024", page=2, text="Cached snippet…"),
+            Source(file="Acting-Down-Policy.pdf", page=3, text="Cached snippet2…"),
+            Source(file="Acting-Down-Policy.pdf", page=5, text="Cached snippet3…"),
+            Source(file="On-Call-Policy.pdf", page=2, text="Cached snippet4…"),
         ]
         return DebugResponse(answer=_DUMMY_ANSWER, trace=_DUMMY_TRACE, sources=dummy_sources)
 

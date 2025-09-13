@@ -20,8 +20,8 @@ async def get_pdf(file: str = Query(..., description="PDF filename")) -> FileRes
     if not filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files allowed")
 
-    pdf_path = ROOT_DIR / "local" / filename
+    pdf_path = ROOT_DIR / "local" / "shrewsbury_policies" / filename
     if not pdf_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail=f"File not found")
 
     return FileResponse(path=pdf_path, media_type="application/pdf", filename=filename)

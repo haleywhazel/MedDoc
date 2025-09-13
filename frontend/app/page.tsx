@@ -56,7 +56,7 @@ export default function Home() {
       if (placeholderIndex !== null) {
         setMessages((prev) => {
           const updated = [...prev];
-          updated[placeholderIndex!] = { sender: "bot" as const, words: [] };
+          updated[placeholderIndex!] = { sender: "bot" as const, words: [], sources: [] }; // give links immediately
           return updated;
         });
 
@@ -65,7 +65,7 @@ export default function Home() {
         if (sources && sources.length > 0) {
           const s0 = sources[0];
           console.log("Opening PDF:", s0.file, "page", s0.page);
-          setCurrentPdf({ file: s0.file, page: s0.page });
+          setCurrentPdf({ file: s0.file, page: s0.page != null ? Number(s0.page) : undefined });
         }
         let i = 0;
         const interval = setInterval(() => {
@@ -75,9 +75,7 @@ export default function Home() {
             const msg = updated[placeholderIndex!];
             if (msg && msg.words) {
               msg.words = words.slice(0, i);
-              if (i >= words.length) {
-                if (sources) msg.sources = sources;
-              }
+              if (i >= words.length && sources) msg.sources = sources;
             }
             return updated;
           });
@@ -142,7 +140,13 @@ export default function Home() {
           {/* Messages */}
           <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end bg-white custom-scrollbar">
             {messages.map((m, idx) => (
-              <MessageBubble key={idx} message={m} />
+              <MessageBubble
+                key={idx}
+                message={m}
+                onSourceClick={(file, pg) => {
+                  setCurrentPdf({ file, page: pg != null ? Number(pg) : undefined });
+                }}
+              />
             ))}
             <div id="chat-bottom" />
           </div>

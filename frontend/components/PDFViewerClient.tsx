@@ -41,7 +41,7 @@ export default function PDFViewerClient({ fileUrl, page }: Props) {
   return (
     <div className="overflow-y-scroll h-full bg-gray-50 border-r border-gray-300 p-2">
       <Document
-        key={fileUrl}
+        key={`${fileUrl}-${page ?? 0}`}
         file={fileUrl}
         onLoadSuccess={(doc) => {
           setNumPages(doc.numPages);
