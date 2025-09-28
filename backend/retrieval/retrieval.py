@@ -11,7 +11,9 @@ This module wraps three concerns:
 The public entry-point is :func:`get_answer`.
 """
 
+import chromadb
 import json
+import os
 import re
 import textwrap
 from dataclasses import asdict, dataclass
@@ -81,9 +83,16 @@ def _get_vector_store(cfg: Dict[str, Any]) -> Chroma:
         model=cfg["embedding_model"],
         openai_api_key=require_env("OPENAI_API_KEY", OPENAI_API_KEY),
     )
+
+    client = chromadb.HttpClient(
+        host=os.getenv("CHROMA_HOST", "localhost"),
+        port=int(os.getenv("CHROMA_PORT", "8000"))
+    )
+
     return Chroma(
-        persist_directory=f"{cfg['chroma']['persist_dir']}/{cfg['embedding_model']}",
-        embedding_function=embeddings,
+        client=client,
+        collection_name="documents",
+        embedding_function=embeddings
     )
 
 
@@ -121,13 +130,16 @@ def get_answer(
     docs = vectordb.similarity_search(question, k=cfg["top_k"])
 
     if len(docs) == 0:
-        return "I couldn't find the relevant information."
+        no_info_msg = "I couldn't find the relevant information."
+        if trace:
+            return no_info_msg, [], {}
+        return no_info_msg, []
     print(docs)
 
     # 2. Build prompt
     context_texts = [
         [
-            f"Document: {doc.metadata['filename']}, Page: {doc.metadata['page_number']}",
+            f"Document: {doc.metadata['filename']}, Page: {doc.metadata.get('page_number', 'unknown')}",
             f"Content: {doc.page_content}",
         ]
         for doc in docs
