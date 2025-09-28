@@ -1,12 +1,22 @@
 fastapi
 uvicorn
+python-multipart
 langchain
-chromadb
-PyMuPDF
-openai  # or groq SDK if you prefer
-python-dotenv
-tiktoken
-PyYAML
+langchain-community
 langchain-openai
-pymupdf4llm
-mangum  # ASGI adapter for AWS Lambda / Vercel edge functions
+langchain-chroma
+chromadb
+openai
+unstructured[pdf]
+pdfminer.six
+PyMuPDF
+pdfplumber
+nltk
+spacy
+numpy
+pandas
+pyyaml
+tqdm
+requests
+httpx
+python-dotenv

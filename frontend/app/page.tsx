@@ -16,9 +16,11 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentPdf, setCurrentPdf] = useState<{ file: string; page?: number | null } | null>(null);
-  const [prodMode, setProdMode] = useState(false);
-  const [traceNext, setTraceNext] = useState(true);
+  const [currentPdf, setCurrentPdf] = useState<{
+    file: string;
+    page?: number | null;
+  } | null>(null);
+  // Removed prodMode and traceNext state - now runs in prod mode by default
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -44,15 +46,12 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const endpoint = traceNext ? "/api/chat/debug" : "/api/chat";
-      const dummyParam = prodMode ? '' : 'use_dummy_response=1';
-      const traceParam = traceNext ? '' : '';
-      const qs = [dummyParam].filter(Boolean).join('&');
-      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${endpoint}${qs ? '?' + qs : ''}`;
+      const endpoint = "/api/chat";
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${endpoint}`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: trimmed }),
+        body: JSON.stringify({ question: trimmed, trace: false }),
       });
       const data = await res.json();
       await new Promise((r) => setTimeout(r, 500));
@@ -60,7 +59,11 @@ export default function Home() {
       if (placeholderIndex !== null) {
         setMessages((prev) => {
           const updated = [...prev];
-          updated[placeholderIndex!] = { sender: "bot" as const, words: [], sources: [] }; // give links immediately
+          updated[placeholderIndex!] = {
+            sender: "bot" as const,
+            words: [],
+            sources: [],
+          }; // give links immediately
           return updated;
         });
 
@@ -69,7 +72,10 @@ export default function Home() {
         if (sources && sources.length > 0) {
           const s0 = sources[0];
           console.log("Opening PDF:", s0.file, "page", s0.page);
-          setCurrentPdf({ file: s0.file, page: s0.page != null ? Number(s0.page) : undefined });
+          setCurrentPdf({
+            file: s0.file,
+            page: s0.page != null ? Number(s0.page) : undefined,
+          });
         }
         let i = 0;
         const step = 2; // show 2 words per frame
@@ -111,32 +117,8 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <header className="px-4 py-2 flex justify-between items-center bg-white shadow">
-        <h1 className="font-semibold">Ello</h1>
-        <div className="flex gap-4 items-center">
-          <label className="flex items-center gap-1 text-sm select-none">
-            <input
-              type="checkbox"
-              checked={prodMode}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setProdMode(checked);
-                
-              }}
-              className="accent-blue-600"
-            />
-            Prod
-          </label>
-          <label className="flex items-center gap-1 text-sm select-none">
-            <input
-              type="checkbox"
-              checked={traceNext}
-              onChange={(e) => setTraceNext(e.target.checked)}
-              className="accent-blue-600"
-            />
-            Trace
-          </label>
-        </div>
+      <header className="px-4 py-2 flex justify-between items-center bg-white shadow text-gray-800">
+        <h1 className="font-semibold">HR Query</h1>
       </header>
 
       {/* Content area with PDF viewer (left) and chat (right) */}
@@ -144,7 +126,11 @@ export default function Home() {
         {/* PDF viewer fills remaining space */}
         <div className="flex-1 hidden md:block border-r border-gray-300 bg-gray-50">
           <PDFViewer
-            fileUrl={currentPdf ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}` : null}
+            fileUrl={
+              currentPdf
+                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}`
+                : null
+            }
             page={currentPdf?.page}
           />
         </div>
@@ -159,7 +145,10 @@ export default function Home() {
                   key={idx}
                   message={m}
                   onSourceClick={(file, pg) => {
-                    setCurrentPdf({ file, page: pg != null ? Number(pg) : undefined });
+                    setCurrentPdf({
+                      file,
+                      page: pg != null ? Number(pg) : undefined,
+                    });
                   }}
                 />
               ))}

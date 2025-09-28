@@ -55,8 +55,8 @@ const ChatInput: React.FC<Props> = ({
           autoResize();
         }}
         rows={1}
-        placeholder="Ask Ello anything…"
-        className="flex-1 rounded p-2 resize-none focus:outline-none custom-scrollbar"
+        placeholder="Enter your HR query here…"
+        className="flex-1 rounded p-2 resize-none focus:outline-none custom-scrollbar text-gray-800"
         style={{ maxHeight: `${maxRows * 24}px` }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
