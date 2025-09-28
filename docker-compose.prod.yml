@@ -55,7 +55,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_URL: 206.189.27.165
+        NEXT_PUBLIC_BACKEND_URL: http://206.189.27.165
     ports:
       - "3000:3000"
     depends_on:
