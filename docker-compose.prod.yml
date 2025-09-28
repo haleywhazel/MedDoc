@@ -48,7 +48,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./logs:/app/logs
-      - ./local:/app/local:ro
+      - ./local:/app/local
     restart: unless-stopped
 
   frontend:
