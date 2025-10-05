@@ -48,10 +48,20 @@ export default function Home() {
     try {
       const endpoint = "/api/chat";
       const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}${endpoint}`;
+
+      const messageHistory = messages.map((msg) => ({
+        role: msg.sender === "user" ? "user" : "assistant",
+        content: msg.text || msg.words?.join(" ") || "",
+      }));
+
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: trimmed, trace: false }),
+        body: JSON.stringify({
+          question: trimmed,
+          trace: false,
+          history: messageHistory,
+        }),
       });
       const data = await res.json();
       await new Promise((r) => setTimeout(r, 500));

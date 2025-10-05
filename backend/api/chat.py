@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Optional, List
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.retrieval.retrieval import _extract_answer_and_sources, get_answer
 
@@ -13,7 +13,10 @@ router = APIRouter(tags=["chat"])
 
 class QueryRequest(BaseModel):
     question: str
-
+    history: Optional[List[dict]] = Field(
+        default=None,
+        description="Previous conversation history"
+    )
 
 class Source(BaseModel):
     file: str
@@ -71,7 +74,6 @@ from fastapi import Query
 # Main chat route – returns answer + source metadata
 # ---------------------------------------------------------------------------
 
-
 @router.post("/chat", response_model=QueryResponse)
 async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> QueryResponse:  # noqa: D401
     """Return an answer for a staff HR question.
@@ -83,7 +85,7 @@ async def chat(req: QueryRequest, use_dummy_response: bool = Query(False)) -> Qu
         return QueryResponse(answer=_DUMMY_ANSWER, sources=sources)
 
     # Use real pipeline with tracing so we can extract source metadata
-    answer, sources, trace = get_answer(req.question, trace=True)
+    answer, sources, trace = get_answer(req.question, history=req.history, trace=True)
     return QueryResponse(answer=answer, sources=[Source(**s) for s in sources])
 
 

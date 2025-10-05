@@ -2,7 +2,7 @@ services:
   chromadb:
     image: chromadb/chroma:latest
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - chroma_data:/chroma/chroma
     environment:
@@ -12,7 +12,7 @@ services:
   preprocessor:
     build:
       context: .
-      dockerfile: scripts/preprocessor.Dockerfile
+      dockerfile: scripts/preprocessor.dev.Dockerfile
     depends_on:
       - chromadb
     environment:
@@ -29,24 +29,26 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     ports:
-      - "8001:8000"
+      - "8000:8000"
     depends_on:
       - chromadb
       - preprocessor
     environment:
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
-      - ENVIRONMENT=production
+      - ENVIRONMENT=development
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./logs:/app/logs
+      - ./backend:/app/backend
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_URL: https://meddoc.fly.dev
+        NEXT_PUBLIC_BACKEND_URL: https://localhost:8000
     ports:
       - "3000:3000"
     depends_on:

@@ -95,6 +95,25 @@ def _get_vector_store(cfg: Dict[str, Any]) -> Chroma:
         embedding_function=embeddings
     )
 
+# ---------------------------------------------------------------------------
+# Chat history formatting
+# ---------------------------------------------------------------------------
+
+def _format_chat_history(history):
+    """Format the message history into a readable context string."""
+    if not history:
+        return ""
+
+    formatted = []
+    for msg in history:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role == "user":
+            formatted.append(f"User: {content}")
+        else:
+            formatted.append(f"Assistant: {content}")
+
+    return "\n".join(formatted)
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -104,6 +123,7 @@ def _get_vector_store(cfg: Dict[str, Any]) -> Chroma:
 def get_answer(
     question: str,
     *,
+    history: list[dict] | None = None,
     trace: bool = False,
     cfg_path: str | Path | None = None,
 ) -> str | Tuple[str, Dict[str, Any]]:
@@ -150,16 +170,32 @@ def get_answer(
     system_prompt = (
         "You are an HR assistant for NHS staff. "
         "Answer the question using ONLY the information in the provided context. "
-        "If the context is insufficient, reply 'I couldn't find the relevant information.' and do not add invented facts.\n\n"
+        "You will be given conversation history for context, but always base your answers on the document context provided.\n\n"
+
+        "Before answering:\n"
+        "- Consider the conversation history to understand what the user is asking about.\n"
+        "- If the question is too vague or ambiguous to answer accurately, ask the user for clarification. "
+        "For example, if they ask 'What's the leave policy?' without specifying which type of leave, "
+        "ask them to specify (e.g., annual leave, sick leave, maternity leave, adoption leave, etc.).\n"
+        "- If the question is clear but the context is insufficient, reply 'I couldn't find the relevant information, could you rephrase or clarify your question?' "
+        "and do not add invented facts.\n\n"
+
         "Output format – important:\n"
-        "After you have written your answer, add a single blank line followed by a JSON object *on a single line* with the key 'sources'.\n"
-        "Note that the sources MUST come from the context, and not generated or made up. The sources must also be relevant to the answer that you provided."
+        "If you provide an answer (not a clarification question), add a single blank line followed by a JSON object "
+        "*on a single line* with the key 'sources'.\n"
+        "Note that the sources MUST come from the context, and not generated or made up. "
+        "The sources must also be relevant to the answer that you provided.\n"
         "The value of 'sources' must be an array of objects, each having: \n"
         "  • file  – the document name (string)\n"
         "  • page  – page number as an integer (omit if unknown)\n\n"
-        "Example:\n"
-        "Employees are entitled to take 52 weeks’ adoption leave. …\n\n"
-        '{"sources":[{"file":"Policy-Handbook.pdf","page":37}]}\n'
+
+        "Example of a complete answer:\n"
+        "Employees are entitled to take 52 weeks' adoption leave. …\n\n"
+        '{"sources":[{"file":"Policy-Handbook.pdf","page":37}]}\n\n'
+
+        "Example of asking for clarification (no sources needed):\n"
+        "Could you please specify which type of leave you're asking about? "
+        "For example: annual leave, sick leave, maternity leave, or adoption leave?\n"
     )
 
     prompt_content = textwrap.dedent(
@@ -167,7 +203,12 @@ def get_answer(
         Context:
         {context}
 
-        Question: {question}
+        {f'''
+        Previous Conversation:
+        {_format_chat_history(history)}
+        ''' if history else ''}
+
+        Current Question: {question}
         """
     )
 
