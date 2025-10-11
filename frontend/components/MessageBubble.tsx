@@ -72,8 +72,7 @@ const MessageBubble: React.FC<Props> = ({ message, onSourceClick }) => {
                 {message.words.map((w, i) => (
                   <span
                     key={i}
-                    className="inline-block animate-fade-in"
-                    style={{ animationDelay: `${i * 0.02}s` }}
+                    className={`inline-block ${i === message.words!.length - 1 ? "animate-fade-in" : ""}`}
                   >
                     {w}&nbsp;
                   </span>
