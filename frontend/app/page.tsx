@@ -20,9 +20,7 @@ export default function Home() {
     file: string;
     page?: number | null;
   } | null>(null);
-  // Removed prodMode and traceNext state - now runs in prod mode by default
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     const el = document.getElementById("chat-bottom");
     el?.scrollIntoView({ behavior: "smooth" });
@@ -73,7 +71,7 @@ export default function Home() {
             sender: "bot" as const,
             words: [],
             sources: [],
-          }; // give links immediately
+          };
           return updated;
         });
 
@@ -88,7 +86,7 @@ export default function Home() {
           });
         }
         let i = 0;
-        const step = 2; // show 2 words per frame
+        const step = 2;
         const interval = setInterval(() => {
           i += step;
           setMessages((prev) => {
@@ -102,14 +100,12 @@ export default function Home() {
           });
           if (i >= words.length) {
             clearInterval(interval);
-            // collapse to single text when animation done
             setMessages((prev) => {
               const updated = [...prev];
               const msgFinal = updated[placeholderIndex!];
               if (msgFinal && msgFinal.words) {
                 msgFinal.text = words.join(" ");
                 delete msgFinal.words;
-                // no trace needed now
                 if (sources) msgFinal.sources = sources;
               }
               return updated;
@@ -125,31 +121,108 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <header className="px-4 py-2 flex justify-between items-center bg-white shadow text-gray-800">
-        <h1 className="font-semibold">HR Query</h1>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Enhanced Header */}
+      <header className="px-6 py-4 flex justify-between items-center bg-white border-b border-slate-200 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800">
+              HR Query Assistant
+            </h1>
+            <p className="text-xs text-slate-500">
+              Intelligent document analysis
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {currentPdf && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-xs font-medium text-blue-700">
+                Document Active
+              </span>
+            </div>
+          )}
+        </div>
       </header>
 
-      {/* Content area with PDF viewer (left) and chat (right) */}
+      {/* Content area */}
       <main className="flex-1 flex overflow-hidden">
-        {/* PDF viewer fills remaining space */}
-        <div className="flex-1 hidden md:block border-r border-gray-300 bg-gray-50">
-          <PDFViewer
-            fileUrl={
-              currentPdf
-                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}`
-                : null
-            }
-            page={currentPdf?.page}
-          />
+        {/* PDF viewer */}
+        <div className="flex-1 hidden md:flex flex-col bg-white border-r border-slate-200">
+          <div className="flex-1 overflow-hidden">
+            <PDFViewer
+              fileUrl={
+                currentPdf
+                  ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pdf?file=${encodeURIComponent(currentPdf.file)}`
+                  : null
+              }
+              page={currentPdf?.page}
+            />
+          </div>
         </div>
 
-        {/* Chat column fixed width */}
-        <div className="w-full md:w-[500px] flex flex-col items-center overflow-hidden py-2">
-          <div className="flex flex-col w-full flex-1 min-h-0 shadow bg-white">
-            {/* Messages */}
-            <div className="flex-1 min-h-0 overflow-y-scroll p-4 pr-1 space-y-4 flex-1 flex-col justify-end custom-scrollbar">
+        {/* Chat column */}
+        <div className="w-full md:w-[540px] flex flex-col bg-gradient-to-b from-slate-50 to-white">
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Messages area */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+              {messages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <svg
+                      className="w-10 h-10 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-800 mb-3">
+                    Welcome to HR Query
+                  </h2>
+                  <p className="text-slate-600 max-w-md mb-6">
+                    Ask questions about your HR documents and get instant
+                    answers with source references.
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 w-full max-w-md">
+                    {[
+                      "What is our vacation policy?",
+                      "Tell me about benefits enrollment",
+                      "What are the remote work guidelines?",
+                    ].map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setQuestion(suggestion)}
+                        className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left shadow-sm hover:shadow"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {messages.map((m, idx) => (
                 <MessageBubble
                   key={idx}
@@ -165,12 +238,15 @@ export default function Home() {
               <div id="chat-bottom" />
             </div>
 
-            <ChatInput
-              value={question}
-              onValueChange={setQuestion}
-              onSend={send}
-              loading={loading}
-            />
+            {/* Input area */}
+            <div className="p-6 bg-white border-t border-slate-200">
+              <ChatInput
+                value={question}
+                onValueChange={setQuestion}
+                onSend={send}
+                loading={loading}
+              />
+            </div>
           </div>
         </div>
       </main>
