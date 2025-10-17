@@ -36,7 +36,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NEXT_PUBLIC_BACKEND_URL=http://206.189.27.165
+ENV NEXT_PUBLIC_BACKEND_URL=https://hrquery.co.uk
 
 # Build the application
 RUN npm run build
