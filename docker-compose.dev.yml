@@ -56,3 +56,7 @@ services:
 
 volumes:
   chroma_data:
+
+networks:
+  default:
+    name: meddoc_net
